@@ -1,0 +1,82 @@
+{% extends 'core/profile_base.html' %}
+{% load static %}
+
+{% block title %} Profile | {% endblock %}
+
+{% block content %}
+ 
+    <form method="POST">
+        {% csrf_token %}
+        {% if messages %}
+        <div class="mb-5 p-4 rounded-xl bg-violet-500 text-white">
+            {% for message in messages %}
+            <p>{{message}}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="mb-5">
+            <label >Old Password</label>
+            <div class="relative">
+                <input type="password" name="old_password" id="old_password" class="w-full mt-2 px-4 py-2 rounded-xl" placeholder="Old Password">
+                <span id="toggle-password" class="absolute top-0 right-0 mt-4 mr-4 cursor-pointer" onclick="togglePassword('old_password')">
+                    <img id="eye-icon-old_password" src="{% static 'core/eye-hide.svg' %}" alt="Toggle Password" class="h-6 w-6 text-gray-400">
+                </span>
+            </div>
+            {% if form.errors.old_password %}
+                <div class="text-red-500 text-sm mt-1">
+                    <p>{{ form.errors.old_password|escape }}</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="mb-5">
+            <label >Password</label>
+            <div class="relative">
+                <input type="password" name="new_password1" id="new_password1" class="w-full mt-2 px-4 py-2 rounded-xl" placeholder="Password">
+                <span id="toggle-password2" class="absolute top-0 right-0 mt-4 mr-4 cursor-pointer" onclick="togglePassword('new_password1')">
+                    <img id="eye-icon-new_password1" src="{% static 'core/eye-hide.svg' %}" alt="Toggle Password" class="h-6 w-6 text-gray-400">
+                </span>
+            </div>
+            {% if form.errors.new_password1 %}
+                <div class="text-red-500 text-sm mt-1">
+                    <p>{{ form.errors.new_password1|escape }}</p>
+                </div>
+            {% endif %}
+            
+        </div>
+        <div class="mb-5">
+            <label >Confirm Password</label>
+            <div class="relative">
+                <input type="password" name="new_password2" id="new_password2" class="w-full mt-2 px-4 py-2 rounded-xl" placeholder="Confirm Password">
+                <span id="toggle-password2" class="absolute top-0 right-0 mt-4 mr-4 cursor-pointer" onclick="togglePassword('new_password2')">
+                    <img id="eye-icon-new_password2" src="{% static 'core/eye-hide.svg' %}" alt="Toggle Password" class="h-6 w-6 text-gray-400">
+                </span>
+            </div>
+            {% if form.errors.new_password2 %}
+                <div class="text-red-500 text-sm mt-1">
+                    <p>{{ form.errors.new_password2|escape }}</p>
+                </div>
+            {% endif %}
+            
+        </div>
+        {% if form.non_field_errors %}
+            <div class="mb-5 p-4 rounded-xl bg-red-300 text-white">
+                <p>{{ form.non_field_errors|escape }}</p>
+            </div>
+        {% endif %}
+        <button class="btn_primary">Change</button>
+    </form>
+ 
+<script>
+    function togglePassword(field) {
+        var passwordField = document.getElementById(field);
+        var eyeIcon = document.getElementById("eye-icon-" + field);
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            eyeIcon.src = "{% static 'core/eye-show.svg' %}";
+        } else {
+            passwordField.type = "password";
+            eyeIcon.src = "{% static 'core/eye-hide.svg' %}";
+        }
+    }
+</script>
+{% endblock %}

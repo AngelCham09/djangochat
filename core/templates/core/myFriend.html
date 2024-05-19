@@ -1,0 +1,55 @@
+{% extends 'core/profile_base.html' %}
+
+{% block title %} Profile | {% endblock %}
+
+{% block content %}
+
+    {% csrf_token %}
+    {% if messages %}
+    <div class="mb-5 p-4 rounded-xl bg-green-500 text-white">
+        {% for message in messages %}
+        <p>{{message}}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form class="mb-5 flex gap-2 justify-center items-center">
+        <input type="text" name="q" placeholder="Search Username" class="w-full px-4 py-2 rounded-xl" >
+        <button type="submit" class="btn_primary">Search</button>
+    </form>
+
+    {% for friend in friends %}
+    <div class="bg-white rounded-xl flex justify-between items-center gap-5 p-3 overflow-x-auto overflow-y-hidden mb-2">
+        <div class="flex flex-col md:flex-row w-full justify-between md:items-center gap-5">
+            <div class="flex items-center gap-5">
+                <img class="rounded-full h-20 w-20 object-cover" src="{{ friend.profile.image.url }}" alt="image">
+        
+                <div>
+                    <h3 class="font-bold">{{friend.username}}</h3>
+                    <p>{{friend.email}}</p>
+                </div>
+            </div>
+            <button id="unfriend_request_btn" data-unfriend-id="{{ friend.id }}" class="btn_error">Unfriend</button>
+      
+        </div>
+       
+    </div>
+    {% endfor %}
+        
+        
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+   
+    document.querySelectorAll('#unfriend_request_btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const unfriendId = this.dataset.unfriendId; // Access directly from button's dataset
+           
+            unfriendRequest(unfriendId);
+        });
+    });
+
+</script>
+{% include 'friend/snippets/unfriend_request.html' %}
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %} Login | {% endblock %}
+
+{% block content %}
+<div class="w-full flex flex-col items-center justify-center">
+
+
+<div class="p-10 lg:p-20 bg-violet-100 rounded-lg mt-20 mb-20 lg:w-4/12">
+    <h1 class="text-3xl md:text-5xl lg:text-6xl text-center mb-10">Login</h1>
+    <form method="POST" action="." class="lg:w-full mx-auto">
+        {% csrf_token %}
+        <div class="mb-5">
+            <label>Username</label>
+            <input type="text" name="username" id="username" class="w-full mt-2 px-4 py-2 rounded-xl" placeholder="Username">
+            {% if form.errors.username %}
+                <div class="text-red-500 text-sm mt-1">
+                <p>{{ form.errors.username|escape }}</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="mb-5">
+            <label>Password</label>
+            <div class="relative">
+                <input type="password" name="password" id="password" placeholder="Password" class="w-full mt-2 px-4 py-2 rounded-xl">
+                <span id="toggle-password" class="absolute top-0 right-0 mt-4 mr-4 cursor-pointer" onclick="togglePassword()">
+                    <img id="eye-icon" src="{% static 'core/eye-hide.svg' %}" alt="Toggle Password" class="h-6 w-6 text-gray-400">
+                </span>
+            </div>
+            {% if form.errors.password %}
+                <div class="text-red-500 text-sm mt-1">
+                <p>{{ form.errors.password|escape }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+            {% if form.non_field_errors %}
+                <div class="mb-5 p-4 rounded-xl bg-red-400 text-white">
+                <p>{{ form.non_field_errors|escape }}</p>
+                </div>
+            {% endif %}
+
+        <!-- {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                <div class="mb-5 p-4 rounded-xl bg-red-300 text-white">
+                    <p>{{ error|escape }}</p>
+                </div>
+                {% endfor %}
+            {% endfor %}
+        {% endif %} -->
+
+        <button class="w-full mt-5 btn_primary">Login</button>
+    </form>
+</div>
+
+</div>
+<script>
+
+    function togglePassword() {
+        var passwordField = document.getElementById("password");
+        var eyeIcon = document.getElementById("eye-icon");
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            eyeIcon.src = "{% static 'core/eye-show.svg' %}";
+        } else {
+            passwordField.type = "password";
+            eyeIcon.src = "{% static 'core/eye-hide.svg' %}";
+        }
+    }
+</script>
+{% endblock %}
+
+

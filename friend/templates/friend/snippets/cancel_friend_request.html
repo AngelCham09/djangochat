@@ -1,0 +1,33 @@
+<script type="text/javascript">
+
+    function cancelFriendRequest(id){
+        let csrf = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        payload = {
+            "cancel_friend_user_id": id,
+        }
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            headers: {
+                'X-CSRFToken' : csrf.value,
+            },
+            url: "{% url 'cancel-friend-request' %}",
+            timeout: 5000,
+            data: payload,
+            success: function(data){
+                if(data['result'] == 'success'){
+                    alert("Cancel friend request Successfully")
+                }else{
+                    alert(data['response'])
+                }
+            },
+            error: function(data){
+                alert("Something went wrong: " + data)
+            },
+            complete: function(data){
+                location.reload()
+            }
+        })
+    }
+
+</script>
