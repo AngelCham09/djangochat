@@ -1,0 +1,33 @@
+<script type="text/javascript">
+
+    function acceptFriendRequest(id){
+        let csrf = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        payload = {
+            "friend_request_id": id,
+        }
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            headers: {
+                'X-CSRFToken' : csrf.value,
+            },
+            url: "{% url 'accept-friend-request' %}",
+            timeout: 5000,
+            data: payload,
+            success: function(data){
+                if(data['result'] == 'success'){
+                    alert("Request Accepted Successfully")
+                }else{
+                    alert(data['response'])
+                }
+            },
+            error: function(data){
+                alert("Something went wrong: " + data)
+            },
+            complete: function(data){
+                location.reload()
+            }
+        })
+    }
+
+</script>

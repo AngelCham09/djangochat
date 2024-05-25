@@ -1,0 +1,185 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %} {{room.name}} | {% endblock %}
+
+{% block content %}
+<div class="p-10 lg:p-20 text-center">
+    <h1 class="text-3xl lg:text-6xl text-white">{{room.name}}</h1>
+</div>
+
+<div class="lg:w-2/4 mx-4 lg:mx-auto p-4 bg-white rounded-xl">
+    <div class="chat-messages space-y-3" id="chat-messages">
+        {% for message in messages %}
+        <div class="p-4 bg-violet-100 rounded-xl">
+            <p class="font-semibold">{{message.user.username}}</p>
+            <p>{{ message.content }}</p>
+            {% if message.image %}
+            <img class="h-24 w-24 object-fit my-auto" src="{{ message.image.image.url }}">
+            {% endif %}
+    
+        </div>
+        {% endfor %}
+       
+    </div>
+
+</div>
+
+<div class="lg:w-2/4 mt-6 mx-4 lg:mx-auto p-4 bg-white rounded-xl mb-20">
+    <form method="POST" action="." enctype="multipart/form-data" class="flex items-center">
+        {% csrf_token %}
+        <input type="text" name="content" class="flex-1 mr-3 p-2" placeholder="Your message..." id="chat-message-input">
+        <span id="upload-file" class="mr-2 cursor-pointer" onclick="togglePassword('password2')">
+            <img id="upload-file" src="{% static 'room/upload-file.svg' %}" alt="Upload File" class="h-6 w-6 text-gray-400">
+            <input type="file" id="file-input" class="hidden" accept="image/*">
+        </span>
+        <button class="btn_primary" id="chat-message-submit">Send</button>
+    </form>
+    <div id="preview" class="hidden w-36 h-36">
+        <img class="rounded-lg shadow-md object-cover" id="preview-file" alt="Preview File" src="">
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+{{ room.slug|json_script:"json-roomname"}}
+{{ request.user.username|json_script:"json-username"}}
+
+<script>
+    const roomName = JSON.parse(document.getElementById('json-roomname').textContent);
+    const userName = JSON.parse(document.getElementById('json-username').textContent);
+    let selectedFile = null;
+
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/'
+        + roomName
+        + '/'
+    );
+   
+    chatSocket.onmessage = function(e) {
+        console.log('onmessage')
+
+        const data = JSON.parse(e.data);
+    
+        if(!data.error_msg){
+            let html = '<div class="p-4 bg-violet-100 rounded-xl">';
+                html += '<p class="font-semibold">' + data.username + '</p>';
+                html += '<p>' + data.message + '</p>';
+            if (data.image_url){
+                html += '<img class="h-24 w-24 object-fit my-auto" src="' + data.image_url + '"/>';
+
+            }
+
+            html += '</div>';
+            document.querySelector('#chat-messages').innerHTML += html;
+            scrollToBottom();
+        }else{
+            alert(data.error_msg);
+        }
+    }
+
+    chatSocket.onclose = function(e) {
+        console.log('onclose')
+    }
+
+    //
+    document.querySelector('#chat-message-submit').onclick = async  function(e) {
+        e.preventDefault();
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+
+        if (selectedFile) { // Check if a file is selected
+            const imageId = await uploadFile(selectedFile); // Upload image and get ID
+            if (imageId) { // Check if upload successful
+            // Send message with uploaded image ID
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'username': userName,
+                'room': roomName,
+                'imageId': imageId
+            }));
+            } else {
+                console.error('Error uploading image');
+            }
+        } else {
+            // Send text message only
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'username': userName,
+                'room': roomName
+            }));
+        }
+
+        messageInputDom.value = '';
+        document.getElementById('preview').classList.add('hidden');
+        selectedFile = null;
+        return false;
+    }
+
+    document.getElementById('upload-file').addEventListener('click', function() {
+        document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', function() {
+        var file = this.files[0];
+        if (file) {
+            selectedFile = file;
+            var reader = new FileReader();
+
+            // Define a function to handle the successful file reading
+            reader.onload = function(e) {
+            // Get the data URL of the image
+            var imageUrl = e.target.result;
+
+            // Set the `src` attribute of the image element to the data URL
+            document.getElementById('preview-file').src = imageUrl;
+            document.getElementById('preview').classList.remove('hidden');
+            };
+
+            // Read the file as a data URL
+            reader.readAsDataURL(file);
+        }
+    });
+
+    async function uploadFile(file) {
+        let csrf = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        const formData = new FormData();
+        formData.append('image', file);
+        const headers = {
+            'X-CSRFToken' : csrf.value,
+        }
+
+        try {
+            
+            const response = await fetch('/rooms/api/images/', {
+                method: 'POST',
+                body: formData,
+                headers: headers
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const imageId = data.id; // Extract image ID from API response (replace with actual key)
+                console.log('Image uploaded successfully! ID:', imageId);
+                return imageId; // Return the image ID
+            } else {
+                console.error('Error uploading image');
+                return null; // Indicate upload failure
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            return null; // Indicate upload failure
+        }
+    }
+
+    function scrollToBottom(){
+        const objDiv =document.querySelector('#chat-messages');
+        objDiv.scrollTop = objDiv.scrollHeight;
+    }
+
+    scrollToBottom();
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Rooms | {% endblock %}
+
+{% block content %}
+<div class="w-full flex flex-col items-center justify-center">
+    <div class="p-10 lg:p-20 bg-violet-100 rounded-lg mt-20 mb-20 lg:w-4/12">
+    <h1 class="text-3xl md:text-5xl lg:text-6xl text-center mb-10">Rooms</h1>
+    <form method="POST" action="." class="lg:w-full mx-auto">
+        {% csrf_token %}
+        <div class="mb-5">
+            <label>Enter Room Name</label>
+            <input placeholder="Room Name ..." type="text" name="name" class="w-full mt-2 px-4 py-2 rounded-xl">
+        </div>
+
+        {% if messages %}
+            <div class="mb-5 p-4 rounded-xl bg-red-300 text-white">
+                {% for message in messages %}
+                <p>{{message}}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <button class="btn_primary w-full mt-5">Create</button>
+    </form>
+    </div>
+</div>
+{% endblock %}

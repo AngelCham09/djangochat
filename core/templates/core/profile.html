@@ -1,0 +1,35 @@
+{% extends 'core/profile_base.html' %}
+
+{% block title %} Profile | {% endblock %}
+
+{% block content %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if messages %}
+        <div class="mb-5 p-4 rounded-xl bg-green-500 text-white">
+            {% for message in messages %}
+            <p>{{message}}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="mb-5">
+            <label >Username</label>
+            <input type="text" name="username" class="w-full mt-2 px-4 py-2 rounded-xl" value={{ user.username}}>
+        </div>
+        <div class="mb-5">
+            <label >Email</label>
+            <input type="email" name="email" class="w-full mt-2 px-4 py-2 rounded-xl" value={{ user.email}}>
+        </div>
+        <div class="mb-5 flex flex-col">
+            <label class="mb-2">Profile Image</label>
+            <label class="mb-2">Current Image : <a href="{{ user.profile.image.url }}">{{ user.profile.image }}</a></label>
+            <input type="file" name="image" accept="image/*">
+        </div>
+        <button class="btn_primary">Update</button>
+    </form>
+    
+
+
+{% endblock %}

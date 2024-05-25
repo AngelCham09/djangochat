@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Discover | {% endblock %}
+
+{% block content %}
+<div class="p-10 lg:p-20 text-center flex flex-col gap-5 justify-center">
+    <h1 class="text-3xl lg:text-6xl text-white">Discover Friends</h1>
+        <form class="mb-5 flex gap-2 justify-center items-center">
+            <input type="text" name="q" placeholder="Search Username" class="w-2/4 px-4 py-2 rounded-xl" >
+            <button type="submit" class="btn_primary">Search</button>
+        </form>
+</div>
+
+<div class="w-full flex flex-wrap items-center">
+  
+    {% for friend in friends %}
+    <div class="w-full lg:w-1/4 px-3 py-3">
+        <div class="p-4 bg-white shadow rounded-xl text-center flex gap-5 justify-between">
+            <img class="rounded-full h-24 w-24 object-cover" src="{{ friend.friend_profile.image.url }}" alt="image">
+            <div class="flex flex-col justify-center">
+                <h2 class="mb-5 text-2xl font-semibold">{{ friend.friend_profile.user.username}}</h2>
+                {% csrf_token %}
+                {% if friend.is_friend == False %}
+                    {% if friend.request_sent == 1 %}
+                    <button id="cancel_friend_request_btn" data-friend-id="{{ friend.friend_profile.user.id }}" class="btn_error">Cancel Friend Request</button>
+                    {% endif %}
+
+                    {% if friend.request_sent == -1 %}
+                    <button id="send_friend_request_btn" data-friend-id="{{ friend.friend_profile.user.id }}" class="btn_primary">+ Send Request</button>
+                    {% endif %}
+
+                    {% if friend.request_sent == 0 %}
+                    <div class="flex gap-2">
+                        <button id="accept_friend_request_btn" data-request-id="{{ friend.pending_friend_reqest_id }}" class="btn_primary">Accept</button>
+                        <button id="reject_friend_request_btn" data-request-id="{{ friend.pending_friend_reqest_id }}" class="btn_error">Reject</button>
+                    </div>
+                    
+                    {% endif %}
+                {% else %}
+                    <button id="unfriend_request_btn" data-unfriend-id="{{ friend.friend_profile.user.id }}" class="btn_error">Unfriend</button>
+                {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+    document.querySelectorAll('#send_friend_request_btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const friendId = this.dataset.friendId; // Access directly from button's dataset
+            sendFriendRequest(friendId);
+        });
+    });
+
+    document.querySelectorAll('#accept_friend_request_btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const requestId = this.dataset.requestId; // Access directly from button's dataset
+            acceptFriendRequest(requestId);
+        });
+    });
+
+    document.querySelectorAll('#reject_friend_request_btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const requestId = this.dataset.requestId; // Access directly from button's dataset
+            rejectFriendRequest(requestId);
+        });
+    });
+
+    document.querySelectorAll('#unfriend_request_btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const unfriendId = this.dataset.unfriendId; // Access directly from button's dataset
+            unfriendRequest(unfriendId);
+        });
+    });
+
+    document.querySelectorAll('#cancel_friend_request_btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const friendId = this.dataset.friendId; // Access directly from button's dataset
+            cancelFriendRequest(friendId);
+        });
+    });
+
+
+    
+    
+
+</script>
+{% include 'friend/snippets/send_friend_request.html' %}
+{% include 'friend/snippets/accept_friend_request.html' %}
+{% include 'friend/snippets/reject_friend_request.html' %}
+{% include 'friend/snippets/unfriend_request.html' %}
+{% include 'friend/snippets/cancel_friend_request.html' %}
+{% endblock %}
