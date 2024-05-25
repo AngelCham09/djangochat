@@ -2,3 +2,4 @@ django>=5.0.0,<5.1.0
 channels>=3.0.0,<4.0.0
 Pillow
 djangorestframework
+python-dotenv
